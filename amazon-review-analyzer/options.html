@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ReviewPro — Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117; --card: #1a1d27; --border: rgba(255,255,255,0.08);
+      --accent: #FF6B35; --text: #f0f2f8; --sub: #8b91a8;
+      --input-bg: #1e2130; --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; }
+    .container { width: 100%; max-width: 560px; }
+    .header { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+    .logo { width: 44px; height: 44px; background: linear-gradient(135deg, #FF6B35, #FF9500); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    h1 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+    .subtitle { font-size: 13px; color: var(--sub); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+    .card h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: 11px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    input, select { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 14px; outline: none; }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,53,0.2); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: linear-gradient(135deg, #FF6B35, #FF9500); color: white; border: none; border-radius: var(--radius); font-family: 'DM Sans'; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .btn:hover { opacity: 0.9; }
+    .toast { display: none; background: #22c55e; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-top: 14px; }
+    .toast.show { display: block; }
+    a { color: var(--accent); }
+    .hint { font-size: 11px; color: var(--sub); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🔍</div>
+      <div>
+        <h1>ReviewPro Settings</h1>
+        <div class="subtitle">Amazon Review Analyzer Pro — Configuration</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔑 API Configuration</h2>
+      <div class="field">
+        <label>Gemini API Key</label>
+        <input type="password" id="apiKey" placeholder="AIzaSy..."/>
+        <div class="hint">Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> — no credit card needed</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>💝 Donation Settings</h2>
+      <div class="field">
+        <label>Your PayPal Username</label>
+        <input type="text" id="paypalUser" placeholder="your-paypal-username"/>
+        <div class="hint">Used to generate PayPal.me links for donations</div>
+      </div>
+      <div class="field">
+        <label>Your UPI ID</label>
+        <input type="text" id="upiId" placeholder="yourname@upi"/>
+        <div class="hint">Shown in the UPI donation tab</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Preferences</h2>
+      <div class="field">
+        <label>Default Analysis Type</label>
+        <select id="defaultAnalysis">
+          <option value="sentiment">Sentiment Analysis</option>
+          <option value="complaints">Complaint Themes</option>
+          <option value="keywords">Top Keywords</option>
+          <option value="quality">Quality Issues</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" id="saveBtn">💾 Save Settings</button>
+    <div class="toast" id="toast">✅ Settings saved successfully!</div>
+  </div>
+
+  <script>
+    const keys = ['apiKey', 'paypalUser', 'upiId', 'defaultAnalysis'];
+    chrome.storage.local.get(keys, (data) => {
+      keys.forEach(k => { if (data[k]) document.getElementById(k).value = data[k]; });
+    });
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const vals = {};
+      keys.forEach(k => { vals[k] = document.getElementById(k).value.trim(); });
+      chrome.storage.local.set(vals, () => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      });
+    });
+  </script>
+</body>
+</html>

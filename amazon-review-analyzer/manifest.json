@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Review & Complaint Analyzer Pro",
+  "version": "1.0.0",
+  "description": "AI-powered review and complaint analyzer for Amazon sellers. Instantly analyze customer sentiment, identify pain points, and get actionable insights.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://*.amazon.com/*",
+    "https://*.amazon.in/*",
+    "https://*.amazon.co.uk/*",
+    "https://*.amazon.de/*",
+    "https://*.amazon.fr/*",
+    "https://*.amazon.ca/*",
+    "https://*.amazon.com.au/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Amazon Review Analyzer Pro"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.com/*",
+        "https://*.amazon.in/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.amazon.de/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.ca/*",
+        "https://*.amazon.com.au/*"
+      ],
+      "js": ["js/content.js"],
+      "css": ["css/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "options_page": "options.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "css/*"],
+      "matches": ["https://*.amazon.com/*", "https://*.amazon.in/*", "https://*.amazon.co.uk/*"]
+    }
+  ]
+}

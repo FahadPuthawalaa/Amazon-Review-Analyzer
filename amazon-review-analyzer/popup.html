@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Review Analyzer Pro</title>
+  <link rel="stylesheet" href="css/popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="header">
+  <div class="header-brand">
+    <div class="brand-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+        <path d="M7 14.5L11.5 19L21 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
+            <stop offset="0%" stop-color="#FF6B35"/>
+            <stop offset="100%" stop-color="#FF9500"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">ReviewPro</span>
+      <span class="brand-tag">Amazon Analyzer</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" id="settingsBtn" title="Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </button>
+    <button class="btn-icon btn-heart" id="donateBtn" title="Support the Developer ❤️">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ========== STATUS BAR ========== -->
+<div class="status-bar" id="statusBar">
+  <div class="status-dot" id="statusDot"></div>
+  <span id="statusText">Checking page...</span>
+</div>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main class="main">
+
+  <!-- API Key Setup Screen -->
+  <section class="screen" id="setupScreen">
+    <div class="setup-hero">
+      <div class="setup-icon">🔑</div>
+      <h2>Connect Your AI</h2>
+      <p>Enter your Google Gemini API key to unlock AI-powered review analysis. It's <strong>free</strong> — no credit card needed.</p>
+    </div>
+    <div class="input-group">
+      <label>Gemini API Key</label>
+      <div class="input-wrapper">
+        <input type="password" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off"/>
+        <button class="btn-eye" id="toggleKey">👁</button>
+      </div>
+      <span class="input-hint">Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></span>
+    </div>
+    <button class="btn-primary" id="saveApiKey">
+      <span>Save & Continue</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </section>
+
+  <!-- Not Amazon Page Screen -->
+  <section class="screen hidden" id="notAmazonScreen">
+    <div class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <h3>Open an Amazon Product</h3>
+      <p>Navigate to any Amazon product page to start analyzing reviews and complaints.</p>
+      <div class="supported-sites">
+        <span>amazon.com</span><span>amazon.in</span><span>amazon.co.uk</span><span>+more</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Analyzer Screen -->
+  <section class="screen hidden" id="analyzerScreen">
+
+    <!-- Product Info Strip -->
+    <div class="product-strip" id="productStrip">
+      <div class="product-rating-badge" id="productRating">—</div>
+      <div class="product-meta">
+        <div class="product-title-short" id="productTitleShort">Loading product...</div>
+        <div class="product-stats-row">
+          <span id="reviewCount">— reviews</span>
+          <span class="dot-sep">·</span>
+          <span id="productCategory">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Nav -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="analyze">🔍 Analyze</button>
+      <button class="tab-btn" data-tab="complaints">⚠️ Complaints</button>
+      <button class="tab-btn" data-tab="insights">💡 Insights</button>
+      <button class="tab-btn" data-tab="reply">✍️ Reply</button>
+    </nav>
+
+    <!-- TAB: Analyze -->
+    <div class="tab-content active" id="tab-analyze">
+      <div class="analyze-controls">
+        <div class="filter-row">
+          <select id="starFilter" class="select-chip">
+            <option value="all">All Stars</option>
+            <option value="1">⭐ 1 Star</option>
+            <option value="2">⭐⭐ 2 Stars</option>
+            <option value="3">⭐⭐⭐ 3 Stars</option>
+            <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+          </select>
+          <select id="analysisType" class="select-chip">
+            <option value="sentiment">Sentiment Analysis</option>
+            <option value="complaints">Complaint Themes</option>
+            <option value="keywords">Top Keywords</option>
+            <option value="quality">Quality Issues</option>
+            <option value="compare">vs Competitors</option>
+          </select>
+        </div>
+        <button class="btn-analyze" id="analyzeBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Run Analysis
+        </button>
+      </div>
+
+      <!-- Sentiment Overview -->
+      <div class="sentiment-overview" id="sentimentOverview" style="display:none">
+        <div class="sentiment-bar-container">
+          <div class="sentiment-label">Positive</div>
+          <div class="sentiment-bar"><div class="bar-fill positive" id="posBar" style="width:0%"></div></div>
+          <div class="sentiment-pct" id="posPct">0%</div>
+        </div>
+        <div class="sentiment-bar-container">
+          <div class="sentiment-label">Neutral</div>
+          <div class="sentiment-bar"><div class="bar-fill neutral" id="neuBar" style="width:0%"></div></div>
+          <div class="sentiment-pct" id="neuPct">0%</div>
+        </div>
+        <div class="sentiment-bar-container">
+          <div class="sentiment-label">Negative</div>
+          <div class="sentiment-bar"><div class="bar-fill negative" id="negBar" style="width:0%"></div></div>
+          <div class="sentiment-pct" id="negPct">0%</div>
+        </div>
+      </div>
+
+      <!-- Result Area -->
+      <div class="result-area" id="resultArea">
+        <div class="result-placeholder">
+          <div class="placeholder-icon">✨</div>
+          <p>Select options and click "Run Analysis" to get AI-powered insights from this product's reviews.</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Analyzing reviews...</div>
+        <div class="loading-sub">Powered by Google Gemini</div>
+      </div>
+    </div>
+
+    <!-- TAB: Complaints -->
+    <div class="tab-content hidden" id="tab-complaints">
+      <div class="complaints-header">
+        <h3>Complaint Intelligence</h3>
+        <p>AI-identified recurring issues that need immediate attention</p>
+      </div>
+      <button class="btn-analyze" id="loadComplaintsBtn">
+        <span>🔎 Extract Complaint Themes</span>
+      </button>
+      <div id="complaintsResult" class="complaints-result"></div>
+    </div>
+
+    <!-- TAB: Insights -->
+    <div class="tab-content hidden" id="tab-insights">
+      <div class="insights-header">
+        <h3>Seller Action Plan</h3>
+        <p>Personalized recommendations based on review patterns</p>
+      </div>
+      <button class="btn-analyze" id="loadInsightsBtn">
+        <span>💡 Generate Insights</span>
+      </button>
+      <div id="insightsResult" class="insights-result"></div>
+    </div>
+
+    <!-- TAB: Reply Generator -->
+    <div class="tab-content hidden" id="tab-reply">
+      <div class="reply-header">
+        <h3>AI Reply Generator</h3>
+        <p>Craft professional responses to negative reviews instantly</p>
+      </div>
+      <div class="input-group">
+        <label>Paste Customer Review</label>
+        <textarea id="reviewText" placeholder="Paste the negative review here..." rows="4"></textarea>
+      </div>
+      <div class="input-group">
+        <label>Tone of Response</label>
+        <div class="tone-chips">
+          <button class="tone-chip active" data-tone="professional">Professional</button>
+          <button class="tone-chip" data-tone="empathetic">Empathetic</button>
+          <button class="tone-chip" data-tone="formal">Formal</button>
+          <button class="tone-chip" data-tone="friendly">Friendly</button>
+        </div>
+      </div>
+      <button class="btn-analyze" id="generateReplyBtn">
+        <span>✍️ Generate Reply</span>
+      </button>
+      <div id="replyResult" class="reply-result"></div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ========== DONATE MODAL ========== -->
+<div class="modal-overlay hidden" id="donateModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeDonate">✕</button>
+
+    <div class="donate-hero">
+      <div class="donate-emoji">💝</div>
+      <h2>Support ReviewPro</h2>
+      <p>This tool is free & ad-free. If it saves you time & money, consider buying me a coffee!</p>
+    </div>
+
+    <div class="donate-tabs">
+      <button class="donate-tab-btn active" data-dtab="paypal">PayPal</button>
+      <button class="donate-tab-btn" data-dtab="upi">UPI</button>
+      <button class="donate-tab-btn" data-dtab="card">Card</button>
+    </div>
+
+    <!-- PayPal -->
+    <div class="donate-tab-content active" id="dtab-paypal">
+      <div class="amount-grid">
+        <button class="amount-btn" data-amount="3">☕ $3</button>
+        <button class="amount-btn active" data-amount="5">🍕 $5</button>
+        <button class="amount-btn" data-amount="10">🎁 $10</button>
+        <button class="amount-btn" data-amount="custom">Custom</button>
+      </div>
+      <input type="number" id="customAmount" class="custom-amount-input hidden" placeholder="Enter amount in USD" min="1"/>
+      <button class="btn-donate-paypal" id="paypalDonate">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.243-8.558 6.243H9.828l-1.167 7.397h4.477l.93-5.882h2.304c5.29 0 8.218-3.001 9.085-7.8a6.22 6.22 0 0 0-.235-1.671z"/></svg>
+        Donate via PayPal
+      </button>
+      <p class="donate-note">You'll be redirected to PayPal's secure checkout</p>
+    </div>
+
+    <!-- UPI -->
+    <div class="donate-tab-content" id="dtab-upi">
+      <div class="upi-container">
+        <div class="qr-placeholder">
+          <div class="qr-code-visual" id="upiQRCode">
+            <!-- Real QR injected by JS when modal opens -->
+            <div style="width:160px;height:160px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:11px">Loading QR…</div>
+          </div>
+          <div class="upi-id-box">
+            <span class="upi-label">UPI ID</span>
+            <span class="upi-id" id="upiIdText">puthawalafahad786@oksbi</span>
+            <button class="btn-copy" id="copyUPI">📋 Copy</button>
+          </div>
+        </div>
+        <p class="upi-instruction">Scan with GPay, PhonePe, Paytm or BHIM — or copy the UPI ID above.</p>
+        <div class="upi-apps">
+          <span>GPay</span><span>PhonePe</span><span>Paytm</span><span>BHIM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="donate-tab-content" id="dtab-card">
+      <div class="card-options">
+        <a href="https://ko-fi.com/fynxther" target="_blank" class="card-option-btn kofi">
+          ☕ Ko-fi — Card, PayPal & More
+        </a>
+        <a href="https://www.paypal.com/paypalme/fahadputhawala" target="_blank" class="card-option-btn bmc">
+          💳 PayPal Direct
+        </a>
+      </div>
+      <p class="donate-note">Ko-fi accepts Visa, Mastercard, Amex, PayPal & Google Pay</p>
+    </div>
+
+    <div class="donate-footer">
+      <span>🙏 Thank you for your support!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS MODAL ========== -->
+<div class="modal-overlay hidden" id="settingsModal">
+  <div class="modal-card">
+    <button class="modal-close" id="closeSettings">✕</button>
+    <h2 class="modal-title">⚙️ Settings</h2>
+
+    <div class="settings-group">
+      <label class="settings-label">Gemini API Key</label>
+      <div class="input-wrapper">
+        <input type="password" id="settingsApiKey" placeholder="AIzaSy..."/>
+        <button class="btn-eye" id="toggleSettingsKey">👁</button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">UPI ID (for donations)</label>
+      <input type="text" id="settingsUpiId" placeholder="yourname@upi"/>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">PayPal Username</label>
+      <input type="text" id="settingsPaypal" placeholder="your-paypal-username"/>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">Default Analysis Type</label>
+      <select id="settingsAnalysisType">
+        <option value="sentiment">Sentiment Analysis</option>
+        <option value="complaints">Complaint Themes</option>
+        <option value="keywords">Top Keywords</option>
+      </select>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label toggle-label">
+        <span>Auto-analyze on page load</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="autoAnalyze"/>
+          <span class="toggle-slider"></span>
+        </div>
+      </label>
+    </div>
+
+    <button class="btn-primary" id="saveSettings">Save Settings</button>
+    <button class="btn-danger" id="clearData">Clear All Data</button>
+  </div>
+</div>
+
+<script src="js/qrcode.js"></script>
+<script src="js/popup.js"></script>
+</body>
+</html>
